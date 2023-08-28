@@ -1,0 +1,24 @@
+{
+    "name": "kackbot_ts",
+    "version": "1.0.0",
+    "description": "Discord bot made in TypeScript",
+    "main": "index.js",
+    "scripts": {
+        "deploy": "ts-node src/deployCommands.ts",
+        "clear": "ts-node src/clearCommands.ts",
+        "start": "ts-node src/index.ts"
+    },
+    "author": "arizox",
+    "license": "ISC",
+    "dependencies": {
+        "@discordjs/builders": "^1.6.3",
+        "@discordjs/rest": "^1.7.1",
+        "discord-api-types": "^0.37.47",
+        "discord.js": "^14.5.0",
+        "ts-node": "^10.9.1"
+    },
+    "devDependencies": {
+        "@types/node": "^20.4.1",
+        "typescript": "^5.1.6"
+    }
+}
