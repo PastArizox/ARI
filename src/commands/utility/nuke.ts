@@ -4,9 +4,11 @@ import {
     SlashCommandBuilder,
     BaseGuildTextChannel,
     Colors,
+    Guild,
 } from 'discord.js';
 import { SlashCommand } from '../../types';
 import { EmbedBuilder } from '@discordjs/builders';
+import { Logger, LogLevel } from '../../utils/logger';
 
 export const command: SlashCommand = {
     name: 'nuke',
@@ -57,9 +59,16 @@ export const command: SlashCommand = {
                 const clonnedChannel = await channel.clone();
                 channel.delete(reason);
                 clonnedChannel.send({ embeds: [nukedEmbed] });
+
+                Logger.log(
+                    interaction.guild as Guild,
+                    'Channel Nuked',
+                    interaction.user,
+                    reason,
+                    LogLevel.WARNING,
+                    `Clone channel: ${clonnedChannel} | ${clonnedChannel.name}`
+                );
             }, delay * 1000)
         );
     },
-
-    // TODO: add logger with reason
 };
