@@ -1,5 +1,6 @@
 import { ActivityType, Client, Events } from 'discord.js';
 import { EventType } from '../types';
+import { ownerId } from '../config.json';
 
 const event: EventType = {
     name: Events.ClientReady,
@@ -7,7 +8,7 @@ const event: EventType = {
     async execute(client: Client<true>) {
         console.log(`Bot is ready !`);
 
-        const user = await client.users.fetch('875075024397156383');
+        const user = await client.users.fetch(ownerId);
 
         client.user.setPresence({
             status: 'online',
@@ -25,9 +26,7 @@ const event: EventType = {
         console.log(`Username: ${client.user.username}`);
         console.log(`UserID: ${client.user.id}`);
         console.log(`User status: ${client.user.presence.status}`);
-        console.log(
-            `Owner username: ${client.user.presence.activities[0].name}`
-        );
+        console.log(`Owner username: ${user.username}`);
         console.log(`Connected on ${client.guilds.cache.size} servers`);
         console.log('===================================================');
     },
