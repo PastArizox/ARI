@@ -2,6 +2,7 @@ import { EmbedBuilder } from '@discordjs/builders';
 import {
     BaseGuildTextChannel,
     ChannelType,
+    Colors,
     Guild,
     PermissionsBitField,
     User,
@@ -67,9 +68,9 @@ class Logger {
 }
 
 enum LogLevel {
-    INFO = 1146986,
-    WARNING = 15105570,
-    IMPORTANT = 15548997,
+    INFO = Colors.Aqua,
+    WARNING = Colors.Orange,
+    IMPORTANT = Colors.Red,
 }
 
 export { Logger, LogLevel };
