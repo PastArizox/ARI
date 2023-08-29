@@ -1,4 +1,9 @@
-import { CommandInteraction, CacheType, SlashCommandBuilder } from 'discord.js';
+import {
+    CommandInteraction,
+    CacheType,
+    SlashCommandBuilder,
+    Colors,
+} from 'discord.js';
 import { SlashCommand } from '../../types';
 import { EmbedBuilder } from '@discordjs/builders';
 import { readdirSync } from 'fs';
@@ -21,6 +26,17 @@ export const command: SlashCommand = {
         const commandsDir = join(__dirname, '../../commands');
 
         readdirSync(commandsDir).forEach((commandsCategorie) => {
+            const categoryParam = interaction.options.get('category')
+                ?.value as string;
+
+            if (
+                categoryParam &&
+                !commandsCategorie
+                    .toLowerCase()
+                    .includes(categoryParam.toLowerCase())
+            )
+                return;
+
             const commandsCategoriePath = join(
                 commandsDir,
                 '/',
@@ -48,7 +64,8 @@ export const command: SlashCommand = {
 
         const embed = new EmbedBuilder()
             .setTitle('Commands')
-            .setDescription(embedDescription);
+            .setDescription(embedDescription)
+            .setColor(Colors.Blurple);
 
         await interaction.reply({ embeds: [embed] });
     },
