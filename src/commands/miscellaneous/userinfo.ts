@@ -56,10 +56,10 @@ export const command: SlashCommand = {
                 status = '🟣 Invisible';
                 break;
             case 'offline':
-                status = '⚫ Offline';
+                status = '🟣 Invisible';
                 break;
             default:
-                status = '❌ Unknown';
+                status = '⚫ Offline';
         }
 
         let clientStatus: string;
@@ -138,7 +138,5 @@ export const command: SlashCommand = {
             .setTimestamp(Date.now());
 
         await interaction.reply({ embeds: [embed] });
-
-        // TODO: add logger
     },
 };
