@@ -62,11 +62,16 @@ export const command: SlashCommand = {
 
                 Logger.log(
                     interaction.guild as Guild,
-                    'Channel Nuked',
+                    '💥 Channel Nuked',
                     interaction.user,
                     reason,
                     LogLevel.WARNING,
-                    `Clone channel: ${clonnedChannel} | ${clonnedChannel.name}`
+                    [
+                        {
+                            title: 'Clone channel',
+                            value: `${clonnedChannel} | ${clonnedChannel.name}`,
+                        },
+                    ]
                 );
             }, delay * 1000)
         );
