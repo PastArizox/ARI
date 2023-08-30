@@ -50,7 +50,10 @@ export const command: SlashCommand = {
 
         const embed = new EmbedBuilder()
             .setTitle(description)
-            .setColor(Colors.Red);
+            .setColor(Colors.Orange)
+            .setImage(
+                'https://media.tenor.com/5JmSgyYNVO0AAAAC/asdf-movie.gif'
+            );
 
         interaction.reply({ embeds: [embed] });
 
@@ -60,7 +63,7 @@ export const command: SlashCommand = {
                 '🌪️ User kicked',
                 interaction.user,
                 reason,
-                LogLevel.IMPORTANT,
+                LogLevel.WARNING,
                 [
                     {
                         title: 'User kicked',
