@@ -5,6 +5,7 @@ import {
     BaseGuildTextChannel,
     Colors,
     Guild,
+    ChannelType,
 } from 'discord.js';
 import { SlashCommand } from '../../types';
 import { EmbedBuilder } from '@discordjs/builders';
@@ -15,16 +16,17 @@ export const command: SlashCommand = {
     data: new SlashCommandBuilder()
         .setName('nuke')
         .setDescription('Nuke a channel and deletes all the messages')
-        .addStringOption((option) =>
-            option
-                .setName('reason')
-                .setDescription('The reason for the nuke')
-                .setRequired(true)
-        )
         .addChannelOption((option) =>
             option
                 .setName('channel')
                 .setDescription('The channel to nuke')
+                .addChannelTypes(ChannelType.GuildText)
+                .setRequired(false)
+        )
+        .addStringOption((option) =>
+            option
+                .setName('reason')
+                .setDescription('The reason for the nuke')
                 .setRequired(false)
         )
         .addIntegerOption((option) =>
@@ -46,8 +48,15 @@ export const command: SlashCommand = {
         let reason = interaction.options.get('reason')?.value as string;
         if (!reason) reason = 'Unknown';
 
+        let description: string;
+        if (channel == interaction.channel) {
+            description = `**This channel** will be nuked in \`${delay}\` seconds`;
+        } else {
+            description = `**${channel.name}** will be nuked in \`${delay}\` seconds`;
+        }
+
         const gettingNukedEmbed = new EmbedBuilder().setDescription(
-            `This channel will be nuked in \`${delay}\` seconds`
+            description
         );
         const nukedEmbed = new EmbedBuilder()
             .setImage(
@@ -67,6 +76,13 @@ export const command: SlashCommand = {
                     reason,
                     LogLevel.WARNING,
                     [
+                        {
+                            title: 'From',
+                            value: `${interaction.channel} | ${
+                                (interaction.channel as BaseGuildTextChannel)
+                                    .name
+                            }`,
+                        },
                         {
                             title: 'Clone channel',
                             value: `${clonnedChannel} | ${clonnedChannel.name}`,
