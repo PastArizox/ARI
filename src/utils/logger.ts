@@ -47,20 +47,23 @@ class Logger {
         author: User,
         reason: string,
         level: LogLevel,
-        other: string | null = null
+        other: LogOtherItem[] = []
     ) {
         let channel = Logger.getLogsChannel(guild);
         if (!channel) {
             channel = await Logger.createLogsChannel(guild);
         }
 
+        let description = `**Author:** ${author} | ${author.id} 
+        **Reason:** ${reason}`;
+
+        other.forEach((otherItem) => {
+            description += `\n**${otherItem.title}:** ${otherItem.value}`;
+        });
+
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(
-                `**Author:** ${author} | ${author.id}
-                **Reason:** ${reason}` +
-                    (other == null ? '' : `\n**Other:** \n${other}`)
-            )
+            .setDescription(description)
             .setColor(level);
 
         channel.send({ embeds: [embed] });
@@ -72,5 +75,10 @@ enum LogLevel {
     WARNING = Colors.Orange,
     IMPORTANT = Colors.Red,
 }
+
+type LogOtherItem = {
+    title: string;
+    value: string;
+};
 
 export { Logger, LogLevel };
