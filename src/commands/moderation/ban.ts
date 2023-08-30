@@ -27,12 +27,14 @@ export const command: SlashCommand = {
                 .setDescription('The reason why you want to ban the user')
                 .setRequired(false)
         )
-        .addNumberOption((option) =>
+        .addIntegerOption((option) =>
             option
                 .setName('days')
                 .setDescription(
                     'Number of days of messages to delete, must be between 0 and 7, inclusive'
                 )
+                .setMinValue(0)
+                .setMaxValue(7)
                 .setRequired(false)
         ),
     async execute(interaction: CommandInteraction<CacheType>) {
