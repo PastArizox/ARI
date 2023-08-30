@@ -36,7 +36,7 @@ export const command: SlashCommand = {
         if (!reason) reason = 'Unknown';
 
         let description: string;
-        let log = false;
+        let passed = false;
 
         if (member == interaction.member) {
             description = "❌ You can't kick yourself !";
@@ -44,7 +44,7 @@ export const command: SlashCommand = {
             description = "❌ You can't kick this user !";
         } else {
             member.kick(reason);
-            log = true;
+            passed = true;
             description = `🌪️ **${member.user.username}** has been kicked off the server !`;
         }
 
@@ -52,12 +52,14 @@ export const command: SlashCommand = {
             .setTitle(description)
             .setColor(Colors.Orange)
             .setImage(
-                'https://media.tenor.com/5JmSgyYNVO0AAAAC/asdf-movie.gif'
+                passed
+                    ? 'https://media.tenor.com/4dTTTBzI-K0AAAAC/thor-hammer.gif'
+                    : null
             );
 
         interaction.reply({ embeds: [embed] });
 
-        if (log) {
+        if (passed) {
             Logger.log(
                 interaction.guild as Guild,
                 '🌪️ User kicked',
