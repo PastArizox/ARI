@@ -52,7 +52,7 @@ export const command: SlashCommand = {
 
         if (member == interaction.member) {
             description = "❌ You can't ban yourself !";
-        } else if (!member.kickable) {
+        } else if (!member.bannable) {
             description = "❌ You can't ban this user !";
         } else {
             member.ban({
