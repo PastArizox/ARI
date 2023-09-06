@@ -26,7 +26,7 @@ export const command: SlashCommand = {
         .addStringOption((option) =>
             option
                 .setName('reason')
-                .setDescription('The reason for the nuke')
+                .setDescription('The reason for the lock')
                 .setRequired(false)
         ),
     async execute(interaction: CommandInteraction<CacheType>) {
