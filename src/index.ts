@@ -1,5 +1,5 @@
 import { Client, Collection, GatewayIntentBits } from 'discord.js';
-import { token } from './config.json';
+import { token } from './secrets.json';
 import { join } from 'path';
 import { readdirSync } from 'fs';
 import { SlashCommand } from './types';

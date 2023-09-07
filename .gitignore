@@ -3,5 +3,5 @@ package-lock.json
 
 .vscode
 
-config.json
+secrets.json
 *.idea

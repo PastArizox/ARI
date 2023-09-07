@@ -1,5 +1,5 @@
 import { REST, Routes } from 'discord.js';
-import { token, clientId } from './config.json';
+import { token, clientId } from './secrets.json';
 
 const rest = new REST().setToken(token);
 

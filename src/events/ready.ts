@@ -1,6 +1,6 @@
 import { ActivityType, Client, Events } from 'discord.js';
 import { EventType } from '../types';
-import { ownerId } from '../config.json';
+import { ownerId } from '../secrets.json';
 
 const event: EventType = {
     name: Events.ClientReady,
