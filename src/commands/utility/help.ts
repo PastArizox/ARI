@@ -8,6 +8,7 @@ import { SlashCommand } from '../../types';
 import { EmbedBuilder } from '@discordjs/builders';
 import { readdirSync } from 'fs';
 import { join } from 'path';
+import { category } from '../../config.json';
 
 export const command: SlashCommand = {
     name: 'help',
@@ -43,7 +44,13 @@ export const command: SlashCommand = {
                 commandsCategorie
             );
 
-            embedDescription += `\n**${commandsCategorie
+            // Get the colors from config.json using category as any so it works
+            // Can be undefined if the category isn't defined in config.json
+            let categoryColor = (category as any)[commandsCategorie];
+
+            embedDescription += `\n${
+                categoryColor ? categoryColor : ''
+            } **${commandsCategorie
                 .charAt(0)
                 .toUpperCase()}${commandsCategorie.slice(1)}**\n`;
 
