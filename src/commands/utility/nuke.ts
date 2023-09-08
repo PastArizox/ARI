@@ -38,15 +38,14 @@ export const command: SlashCommand = {
                 .setRequired(false)
         ),
     async execute(interaction: CommandInteraction<CacheType>) {
-        let channel = interaction.options.get('channel')
-            ?.channel as BaseGuildTextChannel;
-        if (!channel) channel = interaction.channel as BaseGuildTextChannel;
+        let channel =
+            (interaction.options.get('channel')
+                ?.channel as BaseGuildTextChannel) || interaction.channel;
 
-        let delay = interaction.options.get('delay')?.value as number;
-        if (!delay) delay = 0;
+        let delay = (interaction.options.get('delay')?.value as number) || 0;
 
-        let reason = interaction.options.get('reason')?.value as string;
-        if (!reason) reason = 'Unknown';
+        let reason =
+            (interaction.options.get('reason')?.value as string) || 'Unknown';
 
         let description: string;
         if (channel == interaction.channel) {

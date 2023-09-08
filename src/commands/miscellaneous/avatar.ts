@@ -21,8 +21,9 @@ export const command: SlashCommand = {
         )
         .setDMPermission(false),
     async execute(interaction: CommandInteraction<CacheType>) {
-        let member = interaction.options.get('user')?.member as GuildMember;
-        if (!member) member = interaction.member as GuildMember;
+        let member =
+            (interaction.options.get('user')?.member as GuildMember) ||
+            interaction.member;
         let user = member.user;
 
         const username = user.username;

@@ -30,12 +30,12 @@ export const command: SlashCommand = {
                 .setRequired(false)
         ),
     async execute(interaction: CommandInteraction<CacheType>) {
-        let channel = interaction.options.get('channel')
-            ?.channel as BaseGuildTextChannel;
-        if (!channel) channel = interaction.channel as BaseGuildTextChannel;
+        let channel =
+            (interaction.options.get('channel')
+                ?.channel as BaseGuildTextChannel) || interaction.channel;
 
-        let reason = interaction.options.get('reason')?.value as string;
-        if (!reason) reason = 'Unknown';
+        let reason =
+            (interaction.options.get('reason')?.value as string) || 'Unknown';
 
         let passed = false;
         let description: string;

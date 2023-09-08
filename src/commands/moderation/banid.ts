@@ -42,11 +42,10 @@ export const command: SlashCommand = {
     async execute(interaction: CommandInteraction<CacheType>) {
         let userId = interaction.options.get('userid')?.value as string;
 
-        let reason = interaction.options.get('reason')?.value as string;
-        if (!reason) reason = 'Unknown';
+        let reason =
+            (interaction.options.get('reason')?.value as string) || 'Unknown';
 
-        let nbDays = interaction.options.get('days')?.value as number;
-        if (!nbDays) nbDays = 7;
+        let nbDays = (interaction.options.get('days')?.value as number) || 7;
 
         let description: string;
         let passed = false;

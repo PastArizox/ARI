@@ -29,11 +29,12 @@ export const command: SlashCommand = {
                 .setRequired(false)
         ),
     async execute(interaction: CommandInteraction<CacheType>) {
-        let member = interaction.options.get('user')?.member as GuildMember;
-        if (!member) member = interaction.member as GuildMember;
+        let member =
+            (interaction.options.get('user')?.member as GuildMember) ||
+            interaction.member;
 
-        let reason = interaction.options.get('reason')?.value as string;
-        if (!reason) reason = 'Unknown';
+        let reason =
+            (interaction.options.get('reason')?.value as string) || 'Unknown';
 
         let description: string;
         let passed = false;

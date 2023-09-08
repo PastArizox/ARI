@@ -26,8 +26,8 @@ export const command: SlashCommand = {
                 .setRequired(false)
         ),
     async execute(interaction: CommandInteraction<CacheType>) {
-        let amount = Number(interaction.options.get('amount', false)?.value);
-        if (!amount) amount = 15;
+        let amount =
+            Number(interaction.options.get('amount', false)?.value) || 15;
 
         const channel = interaction.channel;
 

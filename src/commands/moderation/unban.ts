@@ -30,8 +30,8 @@ export const command: SlashCommand = {
     async execute(interaction: CommandInteraction<CacheType>) {
         let userId = interaction.options.get('user_id')?.value as string;
 
-        let reason = interaction.options.get('reason')?.value as string;
-        if (!reason) reason = 'Unknown';
+        let reason =
+            (interaction.options.get('reason')?.value as string) || 'Unknown';
 
         let description: string;
         let passed = false;
