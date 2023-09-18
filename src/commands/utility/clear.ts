@@ -7,6 +7,8 @@ import {
 } from 'discord.js';
 import { SlashCommand } from '../../types';
 
+// TODO add permissions check
+
 export const command: SlashCommand = {
     name: 'clear',
     data: new SlashCommandBuilder()
