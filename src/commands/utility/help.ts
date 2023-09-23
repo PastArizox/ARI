@@ -94,14 +94,20 @@ export const command: SlashCommand = {
                     if (
                         commandFile != `${commandParam}.js` &&
                         commandFile != `${commandParam}.ts`
-                    )
+                    ) {
+                        const description = `The command **${commandParam}** doesn't exist`;
+                        embed
+                            .setDescription(description)
+                            .setColor(Colors.Blurple);
                         return;
+                    }
 
                     const commandPath = join(
                         commandsCategoryPath,
                         '/',
                         commandFile
                     );
+
                     const command: SlashCommand = require(commandPath).command;
 
                     let commandUsage = `/${command.name}`;
