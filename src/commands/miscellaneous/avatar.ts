@@ -18,7 +18,8 @@ export const command: SlashCommand = {
                 .setName('user')
                 .setDescription('The user you want to get the avatar')
                 .setRequired(false)
-        ),
+        )
+        .setDMPermission(false),
     async execute(interaction: CommandInteraction<CacheType>) {
         let member =
             (interaction.options.get('user')?.member as GuildMember) ||
