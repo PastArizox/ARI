@@ -8,12 +8,11 @@ import {
     BaseGuildTextChannel,
     Guild,
     User,
+    PermissionsBitField,
 } from 'discord.js';
 import { SlashCommand } from '../../types';
 import { EmbedBuilder } from '@discordjs/builders';
 import { LogLevel, Logger } from '../../utils/logger';
-
-// TODO add permissions check
 
 export const command: SlashCommand = {
     name: 'mute',
@@ -31,7 +30,9 @@ export const command: SlashCommand = {
                 .setName('reason')
                 .setDescription('The reason why you want to mute the user')
                 .setRequired(false)
-        ),
+        )
+        .setDefaultMemberPermissions(PermissionsBitField.Flags.MuteMembers)
+        .setDMPermission(false),
     async execute(interaction: CommandInteraction<CacheType>) {
         let member = interaction.options.get('user')?.member as GuildMember;
 

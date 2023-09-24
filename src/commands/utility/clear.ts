@@ -3,11 +3,10 @@ import {
     Collection,
     CommandInteraction,
     Message,
+    PermissionsBitField,
     SlashCommandBuilder,
 } from 'discord.js';
 import { SlashCommand } from '../../types';
-
-// TODO add permissions check
 
 export const command: SlashCommand = {
     name: 'clear',
@@ -26,7 +25,9 @@ export const command: SlashCommand = {
                 .setName('user')
                 .setDescription('Delete the messages of the specified user')
                 .setRequired(false)
-        ),
+        )
+        .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageMessages)
+        .setDMPermission(false),
     async execute(interaction: CommandInteraction<CacheType>) {
         let amount =
             Number(interaction.options.get('amount', false)?.value) || 15;

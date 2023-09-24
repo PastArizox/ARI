@@ -11,7 +11,8 @@ export const command: SlashCommand = {
     name: 'serverinfo',
     data: new SlashCommandBuilder()
         .setName('serverinfo')
-        .setDescription('Get the informations about the server'),
+        .setDescription('Get the informations about the server')
+        .setDMPermission(false),
     async execute(interaction: CommandInteraction<CacheType>) {
         const server = interaction.guild as Guild;
 

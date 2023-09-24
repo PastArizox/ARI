@@ -6,12 +6,11 @@ import {
     Colors,
     Guild,
     ChannelType,
+    PermissionsBitField,
 } from 'discord.js';
 import { SlashCommand } from '../../types';
 import { EmbedBuilder } from '@discordjs/builders';
 import { Logger, LogLevel } from '../../utils/logger';
-
-// TODO add permissions check
 
 export const command: SlashCommand = {
     name: 'nuke',
@@ -38,7 +37,9 @@ export const command: SlashCommand = {
                 .setMinValue(1)
                 .setMaxValue(86400)
                 .setRequired(false)
-        ),
+        )
+        .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageChannels)
+        .setDMPermission(false),
     async execute(interaction: CommandInteraction<CacheType>) {
         let channel =
             (interaction.options.get('channel')

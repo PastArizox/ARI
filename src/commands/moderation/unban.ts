@@ -5,12 +5,11 @@ import {
     Colors,
     User,
     Guild,
+    PermissionsBitField,
 } from 'discord.js';
 import { SlashCommand } from '../../types';
 import { EmbedBuilder } from '@discordjs/builders';
 import { LogLevel, Logger } from '../../utils/logger';
-
-// TODO add permissions check
 
 export const command: SlashCommand = {
     name: 'unban',
@@ -28,7 +27,9 @@ export const command: SlashCommand = {
                 .setName('reason')
                 .setDescription('The reason why you want to unban the user')
                 .setRequired(false)
-        ),
+        )
+        .setDefaultMemberPermissions(PermissionsBitField.Flags.BanMembers)
+        .setDMPermission(false),
     async execute(interaction: CommandInteraction<CacheType>) {
         let userId = interaction.options.get('user_id')?.value as string;
 

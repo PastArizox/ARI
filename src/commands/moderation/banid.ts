@@ -5,12 +5,11 @@ import {
     GuildMember,
     Colors,
     Guild,
+    PermissionsBitField,
 } from 'discord.js';
 import { SlashCommand } from '../../types';
 import { EmbedBuilder } from '@discordjs/builders';
 import { Logger, LogLevel } from '../../utils/logger';
-
-// TODO add permissions check
 
 export const command: SlashCommand = {
     name: 'banid',
@@ -40,7 +39,9 @@ export const command: SlashCommand = {
                 .setMinValue(0)
                 .setMaxValue(7)
                 .setRequired(false)
-        ),
+        )
+        .setDefaultMemberPermissions(PermissionsBitField.Flags.BanMembers)
+        .setDMPermission(false),
     async execute(interaction: CommandInteraction<CacheType>) {
         let userId = interaction.options.get('userid')?.value as string;
 

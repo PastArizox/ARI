@@ -6,12 +6,11 @@ import {
     BaseGuildTextChannel,
     Guild,
     Colors,
+    PermissionsBitField,
 } from 'discord.js';
 import { SlashCommand } from '../../types';
 import { EmbedBuilder } from '@discordjs/builders';
 import { LogLevel, Logger } from '../../utils/logger';
-
-// TODO add permissions check
 
 export const command: SlashCommand = {
     name: 'unlock',
@@ -30,7 +29,9 @@ export const command: SlashCommand = {
                 .setName('reason')
                 .setDescription('The reason for the unlock')
                 .setRequired(false)
-        ),
+        )
+        .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageChannels)
+        .setDMPermission(false),
     async execute(interaction: CommandInteraction<CacheType>) {
         let channel =
             (interaction.options.get('channel')

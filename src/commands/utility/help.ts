@@ -20,7 +20,8 @@ export const command: SlashCommand = {
                 .setName('command')
                 .setDescription('The command you want to get help for')
                 .setRequired(false)
-        ),
+        )
+        .setDMPermission(true),
     async execute(interaction: CommandInteraction<CacheType>) {
         const commandParam = interaction.options.get('command')
             ?.value as string;
