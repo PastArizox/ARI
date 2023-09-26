@@ -1,0 +1,28 @@
+name: Build and deploy
+
+on:
+  push:
+    branches: [$default-branch]
+  pull_request:
+    branches: [$default-branch]
+
+jobs:
+  build:
+    runs-on: debian-vps
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          depth: 1
+
+      - name: Setup for Docker
+        run: mv ARI/Dockerfile .
+
+      - name: Build the Docker image
+        run: docker build --file Dockerfile --no-cache --build-arg ${{ secrets.SECRETS_PATH }} -t ari
+
+      - name: Run the Docker container
+        run: docker run -d --rm --name ARI -t ari
+
+      - name: Clear working folder
+        run: rm -rf ARI
