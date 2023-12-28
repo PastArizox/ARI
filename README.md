@@ -1,45 +1,33 @@
 # ARI
 
-## Descriptif des commandes
+ARI is a simple discord bot made in [discord.js](https://discord.js.org/) / [Typescript](https://typescriptlang.org/)
 
-Miscellaneous
+## Run Locally
 
--   avatar: Get the avatar of a user
--   ping: Print the ping of the bot
--   serverinfo: Get the informations about the server
--   userinfo: Get all the informations about a user
+Clone the project
 
-Moderation
+```bash
+  git clone https://github.com/PastArizox/ARI.git
+```
 
--   ban: Ban a user from the server
--   banid: Ban a user from the server by its id
--   kick: Kick a user out of the server
--   unban: Unban a user from the server
+Go to the project directory
 
-Utility
+```bash
+  cd ARI/
+```
 
--   clear: Clear a given amount of message in a channel.
--   help: Show all the availaible commands
--   lock: Lock a channel
--   nuke: Nuke a channel and deletes all the messages
--   unlock: Unlock a channel
+Install dependencies
 
-## Lancer le projet
+```bash
+  npm install
+```
 
-Installer les paquets
+Start the project
 
-> npm install
+```bash
+  npm start
+```
 
-Lancer le projet
+## Authors
 
-> npm start
-
-## Scripts supplémentaires
-
-Enregistrer les commandes
-
-> npm run deploy
-
-Supprimer les commandes
-
-> npm run clear
+-   [@PastArizox](https://github.com/PastArizox)
