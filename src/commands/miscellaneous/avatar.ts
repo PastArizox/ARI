@@ -1,10 +1,4 @@
-import {
-    CacheType,
-    Colors,
-    CommandInteraction,
-    GuildMember,
-    SlashCommandBuilder,
-} from 'discord.js';
+import { CacheType, Colors, CommandInteraction, GuildMember, SlashCommandBuilder, User } from 'discord.js';
 import { SlashCommand } from '../../types';
 import { EmbedBuilder } from '@discordjs/builders';
 
@@ -13,7 +7,7 @@ export const command: SlashCommand = {
     data: new SlashCommandBuilder()
         .setName('avatar')
         .setDescription('Get the avatar of a user')
-        .addUserOption((option) =>
+        .addUserOption(option =>
             option
                 .setName('user')
                 .setDescription('The user you want to get the avatar')
@@ -21,20 +15,15 @@ export const command: SlashCommand = {
         )
         .setDMPermission(false),
     async execute(interaction: CommandInteraction<CacheType>) {
-        let member =
-            (interaction.options.get('user')?.member as GuildMember) ||
-            interaction.member;
-        let user = member.user;
-
-        const username = user.username;
-        const avatar = user.avatarURL();
+        const userOption = interaction.options.get('user') as { member?: GuildMember } | null;
+        const member = userOption?.member || interaction.member!;
+        const { user } = member as { user: User };
+        const { username } = user;
 
         const embed = new EmbedBuilder()
             .setTitle(`${username}'s avatar`)
-            .setDescription(
-                avatar ? null : "This user doesn't have any avatar."
-            )
-            .setImage(avatar)
+            .setDescription(user.avatarURL() ? null : "This user doesn't have any avatar.")
+            .setImage(user.avatarURL())
             .setColor(Colors.Yellow);
 
         await interaction.reply({ embeds: [embed] });
