@@ -10,8 +10,6 @@ import { SlashCommand } from '../../types';
 import { EmbedBuilder } from '@discordjs/builders';
 import { LogLevel, Logger } from '../../utils/logger';
 
-// TODO: Check if it works fine
-
 export const command: SlashCommand = {
     name: 'ban',
     data: new SlashCommandBuilder()
