@@ -1,11 +1,9 @@
 import {
-    CommandInteraction,
     CacheType,
     SlashCommandBuilder,
-    GuildMember,
-    Colors,
-    Guild,
     PermissionsBitField,
+    ChatInputCommandInteraction,
+    Colors,
 } from 'discord.js';
 import { SlashCommand } from '../../types';
 import { EmbedBuilder } from '@discordjs/builders';
@@ -42,73 +40,81 @@ export const command: SlashCommand = {
         )
         .setDefaultMemberPermissions(PermissionsBitField.Flags.BanMembers)
         .setDMPermission(false),
-    async execute(interaction: CommandInteraction<CacheType>) {
-        let userId = interaction.options.get('userid')?.value as string;
+    async execute(interaction: ChatInputCommandInteraction<CacheType>) {
+        const userId = interaction.options.getString('userid') as string;
+        const reason =
+            interaction.options.getString('reason') || 'No reason provided';
+        const nbDays = interaction.options.getInteger('days') || 0;
 
-        let reason =
-            (interaction.options.get('reason')?.value as string) || 'Unknown';
+        if (!userId || userId === interaction.member?.user.id) {
+            const embed = new EmbedBuilder()
+                .setTitle('❌ Self-Ban')
+                .setDescription("You can't ban yourself!")
+                .setColor(Colors.Red);
 
-        let nbDays = (interaction.options.get('days')?.value as number) || 7;
-
-        let description: string;
-        let passed = false;
-        let member = null;
-
-        try {
-            let tempMember = interaction.guild?.members.fetch(userId);
-            member = (await tempMember) as GuildMember;
-        } catch {}
-
-        if (userId == interaction.member?.user.id) {
-            description = "❌ You can't ban yourself !";
-        } else if (member && !member.bannable) {
-            description = "❌ You can't ban this user !";
-        } else {
-            if (member) {
-                member.ban({
-                    deleteMessageSeconds: nbDays * 86400, // Number of seconds in 1 day
-                    reason: reason,
-                });
-                description = `⛔ **${member.user.username}** has been banned from the server !`;
-            } else {
-                interaction.guild?.members.ban(userId, {
-                    deleteMessageSeconds: nbDays * 86400, // Number of seconds in 1 day
-                    reason: reason,
-                });
-                description = `⛔ **${userId}** has been banned from the server !`;
-            }
-            passed = true;
+            await interaction.reply({ embeds: [embed], ephemeral: true });
+            return;
         }
 
-        const embed = new EmbedBuilder()
-            .setTitle(description)
-            .setColor(Colors.Red)
-            .setImage(
-                passed
-                    ? 'https://media.tenor.com/4dTTTBzI-K0AAAAC/thor-hammer.gif'
-                    : null
-            );
+        const member = await interaction.guild?.members
+            .fetch(userId)
+            .catch(() => null);
 
-        interaction.reply({ embeds: [embed] });
+        if (!member || !member.bannable) {
+            const embed = new EmbedBuilder()
+                .setTitle('❌ Unable to Ban')
+                .setDescription("I can't ban this user.")
+                .setColor(Colors.Red);
 
-        if (passed) {
+            await interaction.reply({ embeds: [embed], ephemeral: true });
+            return;
+        }
+
+        try {
+            await member.ban({
+                deleteMessageSeconds: nbDays * 86400,
+                reason: reason,
+            });
+
+            const embed = new EmbedBuilder()
+                .setTitle(
+                    `⛔ ${member.user.tag} has been banned from the server!`
+                )
+                .setDescription(`Reason: ${reason}`)
+                .setColor(Colors.Red)
+                .setImage(
+                    'https://media.tenor.com/4dTTTBzI-K0AAAAC/thor-hammer.gif'
+                );
+
+            interaction.reply({ embeds: [embed] });
+
             Logger.log(
-                interaction.guild as Guild,
-                '⛔ User banned',
+                interaction.guild!,
+                '⛔ User Banned',
                 interaction.user,
                 reason,
                 LogLevel.IMPORTANT,
                 [
                     {
-                        title: 'User banned',
-                        value: member ? `${member} | ${member.id}` : userId,
+                        title: 'User Banned',
+                        value: `${member.user.tag} | ${member.id}`,
                     },
                     {
-                        title: 'Deleted messages',
+                        title: 'Deleted Messages',
                         value: `${nbDays} day(s)`,
                     },
                 ]
             );
+        } catch (error) {
+            console.error(error);
+            const embed = new EmbedBuilder()
+                .setTitle('❌ Ban Failed')
+                .setDescription(
+                    'An error occurred while trying to ban the user.'
+                )
+                .setColor(Colors.Red);
+
+            interaction.reply({ embeds: [embed], ephemeral: true });
         }
     },
 };
