@@ -52,7 +52,7 @@ export const command: SlashCommand = {
                 .setDescription("You can't ban yourself!")
                 .setColor(Colors.Red);
 
-            await interaction.reply({ embeds: [embed] });
+            await interaction.reply({ embeds: [embed], ephemeral: true });
             return;
         }
 
@@ -62,7 +62,7 @@ export const command: SlashCommand = {
                 .setDescription("I can't ban this user.")
                 .setColor(Colors.Red);
 
-            await interaction.reply({ embeds: [embed] });
+            await interaction.reply({ embeds: [embed], ephemeral: true });
             return;
         }
 
@@ -110,7 +110,7 @@ export const command: SlashCommand = {
                 )
                 .setColor(Colors.Red);
 
-            interaction.reply({ embeds: [embed] });
+            interaction.reply({ embeds: [embed], ephemeral: true });
         }
     },
 };
