@@ -68,7 +68,7 @@ export const command: SlashCommand = {
 
         try {
             await member.ban({
-                deleteMessageDays: nbDays,
+                deleteMessageSeconds: nbDays * 86400,
                 reason: reason,
             });
 
