@@ -1,18 +1,17 @@
 import {
-    CommandInteraction,
     CacheType,
     SlashCommandBuilder,
+    ChatInputCommandInteraction,
+    PermissionsBitField,
+    ChannelType,
     GuildMember,
     Colors,
-    Role,
-    BaseGuildTextChannel,
-    Guild,
-    User,
-    PermissionsBitField,
 } from 'discord.js';
 import { SlashCommand } from '../../types';
 import { EmbedBuilder } from '@discordjs/builders';
 import { LogLevel, Logger } from '../../utils/logger';
+
+// TODO: Test permissions to write in channels
 
 export const command: SlashCommand = {
     name: 'mute',
@@ -33,60 +32,61 @@ export const command: SlashCommand = {
         )
         .setDefaultMemberPermissions(PermissionsBitField.Flags.MuteMembers)
         .setDMPermission(false),
-    async execute(interaction: CommandInteraction<CacheType>) {
-        let member = interaction.options.get('user')?.member as GuildMember;
+    async execute(interaction: ChatInputCommandInteraction<CacheType>) {
+        const member = interaction.options.getMember('user')! as GuildMember;
+        const reason =
+            interaction.options.getString('reason') || 'No reason provided';
 
-        let reason =
-            (interaction.options.get('reason')?.value as string) || 'Unknown';
+        if (member === interaction.member) {
+            const embed = new EmbedBuilder()
+                .setTitle('❌ Self-Mute')
+                .setDescription("You can't mute yourself!")
+                .setColor(Colors.Red);
 
-        let mutedRole = interaction.guild?.roles.cache.find(
-            (role) => role.name.toLowerCase() === 'muted'
-        );
-
-        if (!mutedRole) {
-            mutedRole = await interaction.guild?.roles.create({
-                name: 'Muted',
-                color: Colors.Grey,
-                reason: `Muted role needed by ${interaction.client.user.username} but didn\'t exist`,
-            });
+            await interaction.reply({ embeds: [embed], ephemeral: true });
+            return;
         }
 
-        interaction.guild?.channels.cache.forEach((channel) => {
-            let textChannel = channel as BaseGuildTextChannel;
-            if (!textChannel) return;
+        const mutedRole =
+            interaction.guild!.roles.cache.find(
+                (role) => role.name.toLowerCase() === 'muted'
+            ) ||
+            (await interaction.guild!.roles.create({
+                name: 'Muted',
+                color: Colors.Grey,
+                reason: "Muted role needed by the bot but didn't exist",
+            }));
 
-            textChannel.permissionOverwrites.create(mutedRole as Role, {
-                SendMessages: false,
-            });
+        interaction.guild!.channels.cache.forEach((channel) => {
+            const textChannel = channel;
+            if (textChannel?.type === ChannelType.GuildText) {
+                textChannel.permissionOverwrites.create(mutedRole.id, {
+                    SendMessages: false,
+                });
+            }
         });
 
-        let description: string;
-        let passed = false;
+        const isAlreadyMuted = member.roles.cache.has(mutedRole.id);
 
-        if (
-            member.roles.cache.find(
-                (role) =>
-                    role.name.toLowerCase() === mutedRole?.name.toLowerCase()
-            )
-        ) {
-            description = `❌ **${member.user.username}** is already muted`;
-        } else {
-            description = `🔇 **${member.user.username}** has been muted`;
-            member.roles.add(mutedRole as Role);
-            passed = true;
+        const description = isAlreadyMuted
+            ? `❌ ${member.user.username} is already muted`
+            : `🔇 ${member.user.username} has been muted`;
+
+        if (!isAlreadyMuted) {
+            await member.roles.add(mutedRole);
         }
 
         const embed = new EmbedBuilder()
             .setTitle(description)
             .setColor(Colors.Red);
 
-        interaction.reply({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed], ephemeral: isAlreadyMuted });
 
-        if (passed) {
+        if (!isAlreadyMuted) {
             Logger.log(
-                interaction.guild as Guild,
+                interaction.guild!,
                 '🔇 User muted',
-                interaction.member?.user as User,
+                interaction.user,
                 reason,
                 LogLevel.IMPORTANT,
                 [
