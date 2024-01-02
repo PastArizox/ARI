@@ -1,5 +1,4 @@
 import {
-    CommandInteraction,
     CacheType,
     SlashCommandBuilder,
     GuildMember,
@@ -7,10 +6,13 @@ import {
     Guild,
     User,
     PermissionsBitField,
+    ChatInputCommandInteraction,
 } from 'discord.js';
 import { SlashCommand } from '../../types';
 import { EmbedBuilder } from '@discordjs/builders';
 import { LogLevel, Logger } from '../../utils/logger';
+
+// TODO: Test permissions to write in channels
 
 export const command: SlashCommand = {
     name: 'unmute',
@@ -31,40 +33,40 @@ export const command: SlashCommand = {
         )
         .setDefaultMemberPermissions(PermissionsBitField.Flags.MuteMembers)
         .setDMPermission(false),
-    async execute(interaction: CommandInteraction<CacheType>) {
-        let member = interaction.options.get('user')?.member as GuildMember;
-
-        let reason =
-            (interaction.options.get('reason')?.value as string) || 'Unknown';
-
-        let description: string;
-        let passed = false;
+    async execute(interaction: ChatInputCommandInteraction<CacheType>) {
+        const member = interaction.options.getMember('user') as GuildMember;
+        const reason =
+            interaction.options.getString('reason') || 'No reason provided';
 
         const mutedRole = interaction.guild?.roles.cache.find(
             (role) => role.name.toLowerCase() === 'muted'
         );
 
-        if (
-            mutedRole &&
-            member.roles.cache.find(
-                (role) =>
-                    role.name.toLowerCase() === mutedRole.name.toLowerCase()
-            )
-        ) {
-            description = `🔉 **${member.user.username}** has been unmuted`;
-            member.roles.remove(mutedRole);
-            passed = true;
-        } else {
-            description = `❌ **${member.user.username}** is not muted`;
+        if (mutedRole == undefined) {
+            const embed = new EmbedBuilder()
+                .setTitle('❌ No-Role')
+                .setDescription("The role 'muted' doesn't exist")
+                .setColor(Colors.Red);
+
+            await interaction.reply({ embeds: [embed], ephemeral: true });
+            return;
         }
 
-        const embed = new EmbedBuilder()
-            .setTitle(description)
-            .setColor(Colors.Green);
+        const isAlreadyMuted =
+            mutedRole && member.roles.cache.has(mutedRole.id);
 
-        interaction.reply({ embeds: [embed] });
+        const description = isAlreadyMuted
+            ? `🔉 **${member.user.username}** has been unmuted`
+            : `❌ **${member.user.username}** is not muted`;
 
-        if (passed) {
+        const color = isAlreadyMuted ? Colors.Green : Colors.Red;
+
+        const embed = new EmbedBuilder().setTitle(description).setColor(color);
+
+        interaction.reply({ embeds: [embed], ephemeral: !isAlreadyMuted });
+
+        if (isAlreadyMuted) {
+            member.roles.remove(mutedRole);
             Logger.log(
                 interaction.guild as Guild,
                 '🔉 User unmuted',
