@@ -56,14 +56,13 @@ export const command: SlashCommand = {
             return;
         }
 
-        const member = await interaction.guild?.members
-            .fetch(userId)
-            .catch(() => null);
+        const bans = await interaction.guild?.bans.fetch();
+        let user = bans?.find((key) => key.user.id === userId)?.user;
 
-        if (!member || !member.bannable) {
+        if (user != undefined) {
             const embed = new EmbedBuilder()
-                .setTitle('❌ Unable to Ban')
-                .setDescription("I can't ban this user.")
+                .setTitle('❌ Banned')
+                .setDescription('This user is already banned from the server.')
                 .setColor(Colors.Red);
 
             await interaction.reply({ embeds: [embed], ephemeral: true });
@@ -71,14 +70,22 @@ export const command: SlashCommand = {
         }
 
         try {
-            await member.ban({
+            await interaction.guild?.members.ban(userId, {
                 deleteMessageSeconds: nbDays * 86400,
                 reason: reason,
             });
 
+            try {
+                user = await interaction.client.users.fetch(userId);
+            } catch (error) {
+                console.error(`Failed to fetch user with id '${userId}'`);
+            }
+
             const embed = new EmbedBuilder()
                 .setTitle(
-                    `⛔ ${member.user.tag} has been banned from the server!`
+                    `⛔ ${
+                        user ? user.username : userId
+                    } has been banned from the server!`
                 )
                 .setDescription(`Reason: ${reason}`)
                 .setColor(Colors.Red)
@@ -96,8 +103,8 @@ export const command: SlashCommand = {
                 LogLevel.IMPORTANT,
                 [
                     {
-                        title: 'User Banned',
-                        value: `${member.user.tag} | ${member.id}`,
+                        title: 'Banned User',
+                        value: `${user} | ${userId}`,
                     },
                     {
                         title: 'Deleted Messages',
