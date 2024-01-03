@@ -1,12 +1,13 @@
 import {
-    CommandInteraction,
     CacheType,
     SlashCommandBuilder,
     ChannelType,
-    BaseGuildTextChannel,
     Guild,
     Colors,
     PermissionsBitField,
+    TextChannel,
+    ChatInputCommandInteraction,
+    Role,
 } from 'discord.js';
 import { SlashCommand } from '../../types';
 import { EmbedBuilder } from '@discordjs/builders';
@@ -30,60 +31,72 @@ export const command: SlashCommand = {
                 .setDescription('The reason for the lock')
                 .setRequired(false)
         )
+        .addRoleOption((option) =>
+            option
+                .setName('role')
+                .setDescription('The role for which to lock the channel')
+        )
         .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageChannels)
         .setDMPermission(false),
-    async execute(interaction: CommandInteraction<CacheType>) {
-        let channel =
-            (interaction.options.get('channel')
-                ?.channel as BaseGuildTextChannel) || interaction.channel;
+    async execute(interaction: ChatInputCommandInteraction<CacheType>) {
+        const channel =
+            interaction.options.getChannel<ChannelType.GuildText>('channel') ||
+            (interaction.channel as TextChannel);
 
-        let reason =
-            (interaction.options.get('reason')?.value as string) || 'Unknown';
+        const reason =
+            interaction.options.getString('reason') || 'No reason provided';
 
-        let passed = false;
-        let description: string;
+        const role =
+            (interaction.options.getRole('role') as Role) ||
+            channel.guild.roles.everyone;
 
-        if (channel.name.includes('🔒-')) {
-            description = '🔒 This channel is already locked';
-        } else {
-            passed = true;
-
-            channel.setName(`🔒-${channel.name}`, reason);
-            channel.permissionOverwrites.create(channel.guild.roles.everyone, {
-                SendMessages: false,
-            });
-
-            description = `🔒 **${channel}** has been locked`;
-        }
-
-        const embed = new EmbedBuilder()
-            .setTitle(description)
-            .setColor(Colors.Blue);
-
-        if (passed) {
-            const embedLocked = new EmbedBuilder()
-                .setTitle('🔒 This channel is now locked')
+        if (
+            !channel
+                .permissionsFor(role)
+                .has(PermissionsBitField.Flags.SendMessages)
+        ) {
+            const embed = new EmbedBuilder()
+                .setTitle(`🔒 This channel is already locked`)
+                .setDescription(`For ${role}`)
                 .setColor(Colors.Blue);
 
-            channel.send({ embeds: [embedLocked] });
+            await interaction.reply({ embeds: [embed], ephemeral: true });
+            return;
         }
 
-        interaction.reply({ embeds: [embed] });
+        await channel.permissionOverwrites.create(role, {
+            SendMessages: false,
+        });
 
-        if (passed) {
-            Logger.log(
-                interaction.guild as Guild,
-                '🔒 Channel locked',
-                interaction.user,
-                reason,
-                LogLevel.WARNING,
-                [
-                    {
-                        title: 'Locked channel',
-                        value: `${channel} | ${channel.name}`,
-                    },
-                ]
-            );
+        const embed = new EmbedBuilder()
+            .setTitle(`🔒 Channel has been locked`)
+            .setDescription(`For ${role}`)
+            .setColor(Colors.Blue);
+
+        const sameChannel = channel == interaction.channel;
+
+        await interaction.reply({ embeds: [embed], ephemeral: !sameChannel });
+
+        if (!sameChannel) {
+            await channel.send({ embeds: [embed] });
         }
+
+        Logger.log(
+            interaction.guild as Guild,
+            '🔒 Channel locked',
+            interaction.user,
+            reason,
+            LogLevel.WARNING,
+            [
+                {
+                    title: 'Locked channel',
+                    value: `${channel} | ${channel.name}`,
+                },
+                {
+                    title: 'For',
+                    value: `${role} | ${role.name}`,
+                },
+            ]
+        );
     },
 };
