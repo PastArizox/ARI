@@ -1,9 +1,17 @@
-import { CommandInteraction, CacheType, SlashCommandBuilder, Colors } from 'discord.js';
+import {
+    CommandInteraction,
+    CacheType,
+    SlashCommandBuilder,
+    Colors,
+} from 'discord.js';
 import { SlashCommand } from '../../types';
 import { readdirSync } from 'fs';
 import { join } from 'path';
 import { category } from '../../config.json';
-import { EmbedBuilder, ToAPIApplicationCommandOptions } from '@discordjs/builders';
+import {
+    EmbedBuilder,
+    ToAPIApplicationCommandOptions,
+} from '@discordjs/builders';
 
 export const command: SlashCommand = {
     name: 'help',
@@ -19,7 +27,8 @@ export const command: SlashCommand = {
         .setDMPermission(true),
 
     async execute(interaction: CommandInteraction<CacheType>) {
-        const commandParam = interaction.options.get('command')?.value as string;
+        const commandParam = interaction.options.get('command')
+            ?.value as string;
 
         const embed = new EmbedBuilder().setColor(Colors.Blurple);
         let embedDescription = '';
@@ -30,10 +39,13 @@ export const command: SlashCommand = {
             const commandsCategoryPath = join(commandsDir, commandsCategory);
             const categoryColor = (category as any)[commandsCategory] || '';
 
-            embedDescription += `\n${categoryColor} **# ${commandsCategory.toUpperCase()} [${readdirSync(commandsCategoryPath).length}]**\n\n`;
+            embedDescription += `\n${categoryColor} **# ${commandsCategory.toUpperCase()} [${
+                readdirSync(commandsCategoryPath).length
+            }]**\n\n`;
 
             for (const commandFile of readdirSync(commandsCategoryPath)) {
-                if (!commandFile.endsWith('ts') && !commandFile.endsWith('js')) continue;
+                if (!commandFile.endsWith('ts') && !commandFile.endsWith('js'))
+                    continue;
 
                 const commandPath = join(commandsCategoryPath, commandFile);
                 const command: SlashCommand = require(commandPath).command;
@@ -51,10 +63,17 @@ export const command: SlashCommand = {
             let commandExists = false;
 
             for (const commandsCategory of readdirSync(commandsDir)) {
-                const commandsCategoryPath = join(commandsDir, commandsCategory);
+                const commandsCategoryPath = join(
+                    commandsDir,
+                    commandsCategory
+                );
 
                 for (const commandFile of readdirSync(commandsCategoryPath)) {
-                    if (!commandFile.endsWith('ts') && !commandFile.endsWith('js')) continue;
+                    if (
+                        !commandFile.endsWith('ts') &&
+                        !commandFile.endsWith('js')
+                    )
+                        continue;
 
                     if (
                         commandFile === `${commandParam}.js` ||
@@ -62,34 +81,66 @@ export const command: SlashCommand = {
                     ) {
                         commandExists = true;
 
-                        const commandPath = join(commandsCategoryPath, commandFile);
-                        const command: SlashCommand = require(commandPath).command;
+                        const commandPath = join(
+                            commandsCategoryPath,
+                            commandFile
+                        );
+                        const command: SlashCommand =
+                            require(commandPath).command;
 
-                        const commandUsage = `/${command.name} ${command.data.options.map(option => optionToUsage(option)).join(' ')}`;
-                        const commandOptions = command.data.options.map(option => `${optionToUsage(option)} : ${option.toJSON().description}`).join('\n');
+                        const commandUsage = `/${
+                            command.name
+                        } ${command.data.options
+                            .map((option) => optionToUsage(option))
+                            .join(' ')}`;
 
-                        embed.setTitle(`Detailed information about : \`${command.name}\``)
+                        const commandOptions = command.data.options
+                            .map(
+                                (option) =>
+                                    `${optionToUsage(option)} : ${
+                                        option.toJSON().description
+                                    }`
+                            )
+                            .join('\n');
+
+                        embed
+                            .setTitle(
+                                `Detailed information about : \`${command.name}\``
+                            )
                             .addFields(
-                                { name: 'Command', value: `\`${command.name}\`` },
-                                { name: 'Description', value: `\`${command.data.description}\`` },
+                                {
+                                    name: 'Command',
+                                    value: `\`${command.name}\``,
+                                },
+                                {
+                                    name: 'Description',
+                                    value: `\`${command.data.description}\``,
+                                },
                                 { name: 'Usage', value: `\`${commandUsage}\`` },
-                                { name: 'Options', value: `\`${commandOptions || 'None'}\`` }
+                                {
+                                    name: 'Options',
+                                    value: `\`${commandOptions || 'None'}\``,
+                                }
                             )
                             .setFooter({
                                 text: 'Syntax: <> = required, [] = optional',
                             });
-                        
+
                         break;
                     }
                 }
-                
+
                 if (commandExists) {
                     break;
                 }
             }
 
             if (!commandExists) {
-                embed.setDescription(`The command **${commandParam}** doesn't exist`).setColor(Colors.Blurple);
+                embed
+                    .setDescription(
+                        `The command **${commandParam}** doesn't exist`
+                    )
+                    .setColor(Colors.Blurple);
             }
         }
 
@@ -98,5 +149,7 @@ export const command: SlashCommand = {
 };
 
 function optionToUsage(option: ToAPIApplicationCommandOptions): string {
-    return option.toJSON().required ? `<${option.toJSON().name}>` : `[${option.toJSON().name}]`;
+    return option.toJSON().required
+        ? `<${option.toJSON().name}>`
+        : `[${option.toJSON().name}]`;
 }
