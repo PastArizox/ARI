@@ -1,11 +1,11 @@
 import {
-    CommandInteraction,
     CacheType,
     SlashCommandBuilder,
     GuildMember,
     Colors,
     Guild,
     PermissionsBitField,
+    ChatInputCommandInteraction,
 } from 'discord.js';
 import { SlashCommand } from '../../types';
 import { EmbedBuilder } from '@discordjs/builders';
@@ -30,52 +30,70 @@ export const command: SlashCommand = {
         )
         .setDefaultMemberPermissions(PermissionsBitField.Flags.KickMembers)
         .setDMPermission(false),
-    async execute(interaction: CommandInteraction<CacheType>) {
-        let member =
-            (interaction.options.get('user')?.member as GuildMember) ||
-            interaction.member;
+    async execute(interaction: ChatInputCommandInteraction<CacheType>) {
+        const member = (interaction.options.getMember('user') ||
+            interaction.member!) as GuildMember;
+        const reason =
+            interaction.options.getString('reason') || 'No reason provided';
 
-        let reason =
-            (interaction.options.get('reason')?.value as string) || 'Unknown';
+        if (member === interaction.member) {
+            const embed = new EmbedBuilder()
+                .setTitle('❌ Self-Kick')
+                .setDescription("You can't kick yourself!")
+                .setColor(Colors.Red);
 
-        let description: string;
-        let passed = false;
-
-        if (member == interaction.member) {
-            description = "❌ You can't kick yourself !";
-        } else if (!member.kickable) {
-            description = "❌ You can't kick this user !";
-        } else {
-            member.kick(reason);
-            passed = true;
-            description = `🌪️ **${member.user.username}** has been kicked off the server !`;
+            await interaction.reply({ embeds: [embed], ephemeral: true });
+            return;
         }
 
-        const embed = new EmbedBuilder()
-            .setTitle(description)
-            .setColor(Colors.Orange)
-            .setImage(
-                passed
-                    ? 'https://media.tenor.com/4dTTTBzI-K0AAAAC/thor-hammer.gif'
-                    : null
-            );
+        if (!member || !member.kickable) {
+            const embed = new EmbedBuilder()
+                .setTitle('❌ Unable to Kick')
+                .setDescription("I can't kick this user.")
+                .setColor(Colors.Red);
 
-        interaction.reply({ embeds: [embed] });
+            await interaction.reply({ embeds: [embed], ephemeral: true });
+            return;
+        }
 
-        if (passed) {
+        try {
+            await member.kick(reason);
+
+            const embed = new EmbedBuilder()
+                .setTitle(
+                    `🌪️ ${member.user.tag} has been kicked from the server!`
+                )
+                .setDescription(`Reason: ${reason}`)
+                .setColor(Colors.Orange)
+                .setImage(
+                    'https://media.tenor.com/5JmSgyYNVO0AAAAC/asdf-movie.gif'
+                );
+
+            interaction.reply({ embeds: [embed] });
+
             Logger.log(
-                interaction.guild as Guild,
-                '🌪️ User kicked',
+                interaction.guild!,
+                '🌪️ User Kicked',
                 interaction.user,
                 reason,
-                LogLevel.WARNING,
+                LogLevel.IMPORTANT,
                 [
                     {
-                        title: 'User kicked',
-                        value: `${member} | ${member.id}`,
+                        title: 'User Kicked',
+                        value: `${member.user.tag} | ${member.id}`,
                     },
                 ]
             );
+        } catch (error) {
+            console.error(error);
+            const embed = new EmbedBuilder()
+                .setTitle('❌ Kick Failed')
+                .setDescription(
+                    'An error occurred while trying to kick the user.'
+                )
+                .setColor(Colors.Red);
+
+            interaction.reply({ embeds: [embed], ephemeral: true });
         }
     },
 };

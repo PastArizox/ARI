@@ -1,11 +1,10 @@
 import {
-    CommandInteraction,
     CacheType,
     SlashCommandBuilder,
+    GuildMember,
     Colors,
-    User,
-    Guild,
     PermissionsBitField,
+    ChatInputCommandInteraction,
 } from 'discord.js';
 import { SlashCommand } from '../../types';
 import { EmbedBuilder } from '@discordjs/builders';
@@ -19,7 +18,7 @@ export const command: SlashCommand = {
         .addStringOption((option) =>
             option
                 .setName('user_id')
-                .setDescription('The id of the user you want to unban')
+                .setDescription('The ID of the user you want to unban')
                 .setRequired(true)
         )
         .addStringOption((option) =>
@@ -30,43 +29,57 @@ export const command: SlashCommand = {
         )
         .setDefaultMemberPermissions(PermissionsBitField.Flags.BanMembers)
         .setDMPermission(false),
-    async execute(interaction: CommandInteraction<CacheType>) {
-        let userId = interaction.options.get('user_id')?.value as string;
+    async execute(interaction: ChatInputCommandInteraction<CacheType>) {
+        const userId = interaction.options.getString('user_id') as string;
+        const reason =
+            interaction.options.getString('reason') || 'No reason provided';
 
-        let reason =
-            (interaction.options.get('reason')?.value as string) || 'Unknown';
+        const bans = await interaction.guild?.bans.fetch();
+        const user = bans?.find((key) => key.user.id === userId)?.user;
 
-        let description: string;
-        let passed = false;
+        if (user == undefined) {
+            const embed = new EmbedBuilder()
+                .setTitle('❌ Not banned')
+                .setDescription('This user is not banned from the server.')
+                .setColor(Colors.Red);
 
-        try {
-            await interaction.guild?.members.unban(userId);
-            passed = true;
-            description = `✅ **${userId}** has been unbanned from the server`;
-        } catch {
-            description = '❌ This user is not banned from this server';
+            await interaction.reply({ embeds: [embed], ephemeral: true });
+            return;
         }
 
-        const embed = new EmbedBuilder()
-            .setTitle(description)
-            .setImage(
-                passed
-                    ? 'https://media.tenor.com/4CPKscdlZEAAAAAC/eric-young-jail.gif'
-                    : null
-            )
-            .setColor(Colors.Green);
+        try {
+            await interaction.guild?.members.unban(userId, reason);
 
-        interaction.reply({ embeds: [embed] });
+            const embed = new EmbedBuilder()
+                .setTitle(
+                    `✅ ${user.username} has been unbanned from the server`
+                )
+                .setColor(Colors.Green)
+                .setImage(
+                    'https://media.tenor.com/4CPKscdlZEAAAAAC/eric-young-jail.gif'
+                );
 
-        if (passed) {
+            interaction.reply({ embeds: [embed] });
+
             Logger.log(
-                interaction.guild as Guild,
-                '✅ User unbanned',
-                interaction.member?.user as User,
+                interaction.guild!,
+                '✅ User Unbanned',
+                interaction.user,
                 reason,
                 LogLevel.INFO,
-                [{ title: 'Unbanned UserId', value: userId }]
+                [{ title: 'Unbanned User', value: `${user} | ${userId}` }]
             );
+        } catch (error) {
+            console.error(error);
+
+            const embed = new EmbedBuilder()
+                .setTitle('❌ Unban Failed')
+                .setDescription(
+                    'An error occurred while trying to unban the user.'
+                )
+                .setColor(Colors.Red);
+
+            interaction.reply({ embeds: [embed], ephemeral: true });
         }
     },
 };

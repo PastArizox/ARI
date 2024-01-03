@@ -11,14 +11,14 @@
     "author": "arizox",
     "license": "ISC",
     "dependencies": {
-        "@discordjs/builders": "^1.6.3",
-        "@discordjs/rest": "^1.7.1",
-        "discord-api-types": "^0.37.47",
-        "discord.js": "^14.5.0",
-        "ts-node": "^10.9.1"
+        "@discordjs/builders": "^1.7.0",
+        "@discordjs/rest": "^2.2.0",
+        "discord-api-types": "^0.37.66",
+        "discord.js": "^14.14.1",
+        "ts-node": "^10.9.2"
     },
     "devDependencies": {
-        "@types/node": "^20.4.1",
-        "typescript": "^5.1.6"
+        "@types/node": "^20.10.5",
+        "typescript": "^5.3.3"
     }
 }

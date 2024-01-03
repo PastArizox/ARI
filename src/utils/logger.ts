@@ -9,26 +9,21 @@ import {
 } from 'discord.js';
 
 class Logger {
-    private static getLogsChannel(guild: Guild): BaseGuildTextChannel | null {
-        const channels = guild.channels.cache;
-        let result = null;
-        channels.forEach((channel) => {
-            if (
-                channel.type == ChannelType.GuildText &&
-                channel.name.toLowerCase().includes('Logs'.toLowerCase())
-            ) {
-                result = channel as BaseGuildTextChannel;
-                return;
-            }
-        });
-        return result;
-    }
-
-    private static async createLogsChannel(
+    private static async getOrCreateLogsChannel(
         guild: Guild
     ): Promise<BaseGuildTextChannel> {
-        const channel = await guild.channels.create({
-            name: 'Logs',
+        const existingChannel = guild.channels.cache.find(
+            (channel) =>
+                channel.type === ChannelType.GuildText &&
+                channel.name.toLowerCase().includes('logs')
+        ) as BaseGuildTextChannel;
+
+        if (existingChannel) {
+            return existingChannel;
+        }
+
+        return await guild.channels.create({
+            name: 'logs',
             type: ChannelType.GuildText,
             permissionOverwrites: [
                 {
@@ -37,8 +32,6 @@ class Logger {
                 },
             ],
         });
-
-        return channel;
     }
 
     static async log(
@@ -49,17 +42,14 @@ class Logger {
         level: LogLevel,
         other: LogOtherItem[] = []
     ) {
-        let channel = Logger.getLogsChannel(guild);
-        if (!channel) {
-            channel = await Logger.createLogsChannel(guild);
-        }
+        const channel = await Logger.getOrCreateLogsChannel(guild);
 
-        let description = `**Author:** ${author} | ${author.id} 
-        **Reason:** ${reason}`;
+        const otherInfo = other
+            .map((item) => `**${item.title}:** ${item.value}`)
+            .join('\n');
 
-        other.forEach((otherItem) => {
-            description += `\n**${otherItem.title}:** ${otherItem.value}`;
-        });
+        const description = `**Author:** ${author} | ${author.id} 
+        **Reason:** ${reason}\n${otherInfo}`;
 
         const embed = new EmbedBuilder()
             .setTitle(title)

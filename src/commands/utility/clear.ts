@@ -1,23 +1,27 @@
 import {
     CacheType,
-    Collection,
-    CommandInteraction,
-    Message,
     PermissionsBitField,
     SlashCommandBuilder,
+    Colors,
+    ChatInputCommandInteraction,
+    TextChannel,
+    Collection,
 } from 'discord.js';
 import { SlashCommand } from '../../types';
+import { EmbedBuilder } from '@discordjs/builders';
+import { Logger, LogLevel } from '../../utils/logger';
 
 export const command: SlashCommand = {
     name: 'clear',
     data: new SlashCommandBuilder()
         .setName('clear')
-        .setDescription('Clear a given amount of message in a channel.')
+        .setDescription('Clear a given amount of messages in a channel.')
         .addNumberOption((option) =>
             option
                 .setName('amount')
                 .setDescription('Amount of messages to delete')
                 .setMinValue(1)
+                .setMaxValue(50)
                 .setRequired(false)
         )
         .addUserOption((option) =>
@@ -28,51 +32,56 @@ export const command: SlashCommand = {
         )
         .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageMessages)
         .setDMPermission(false),
-    async execute(interaction: CommandInteraction<CacheType>) {
-        let amount =
-            Number(interaction.options.get('amount', false)?.value) || 15;
-
-        const channel = interaction.channel;
+    async execute(interaction: ChatInputCommandInteraction<CacheType>) {
+        let amount = interaction.options.getNumber('amount') || 15;
+        const channel = interaction.channel as TextChannel;
 
         if (!channel) {
-            console.error('Intent maybe not enabled');
+            console.error('Intent may not be enabled');
             return;
         }
 
-        let messages = new Collection<String, Message>();
-        const userToDeleteFrom = interaction.options.get('user', false)?.user;
+        const user = interaction.options.getUser('user');
 
-        if (userToDeleteFrom) {
-            await channel.messages.fetch({ cache: false }).then((msgs) => {
-                let count = 0;
-
-                msgs.forEach((message, key) => {
-                    if (count >= amount) return;
-                    if (message.author === userToDeleteFrom) {
-                        messages.set(key, message);
-                        count++;
-                    }
-                });
-            });
-        } else {
-            messages = await channel.messages.fetch({
-                limit: amount,
-                cache: false,
-            });
-        }
-
-        let deleted = 0;
-        messages.forEach((message) => {
-            message.delete();
-            deleted++;
+        let messages = await channel.messages.fetch({
+            limit: user ? undefined : amount,
+            cache: false,
         });
 
-        await interaction
-            .reply(`\`${deleted}\` messages have been deleted.`)
-            .then((message) => {
-                setTimeout(() => message.delete(), 3000);
-            }); // TODO: replace by embed
+        if (user) {
+            messages = messages.filter(
+                (message) => message.author.id === user.id
+            );
 
-        // TODO: Add logger
+            const entriesArray = Array.from(messages.entries());
+            const slicedEntries = entriesArray.slice(0, amount);
+
+            messages = new Collection(slicedEntries);
+        }
+
+        if (messages.size > 0) {
+            await channel.bulkDelete(messages);
+        }
+
+        const embed = new EmbedBuilder()
+            .setTitle('🗑️ Message Clearance')
+            .setDescription(`\`${messages.size}\` messages have been deleted.`)
+            .setColor(Colors.Blue);
+
+        interaction.reply({ embeds: [embed] });
+
+        Logger.log(
+            interaction.guild!,
+            '🗑️ Messages Cleared',
+            interaction.user,
+            `Deleted ${messages.size} messages.`,
+            LogLevel.IMPORTANT,
+            [
+                {
+                    title: 'For',
+                    value: user ? `${user} | ${user.id}` : 'All',
+                },
+            ]
+        );
     },
 };

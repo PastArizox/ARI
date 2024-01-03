@@ -4,6 +4,7 @@ import {
     CommandInteraction,
     GuildMember,
     SlashCommandBuilder,
+    User,
 } from 'discord.js';
 import { SlashCommand } from '../../types';
 import { EmbedBuilder } from '@discordjs/builders';
@@ -21,20 +22,19 @@ export const command: SlashCommand = {
         )
         .setDMPermission(false),
     async execute(interaction: CommandInteraction<CacheType>) {
-        let member =
-            (interaction.options.get('user')?.member as GuildMember) ||
-            interaction.member;
-        let user = member.user;
-
-        const username = user.username;
-        const avatar = user.avatarURL();
+        const userOption = interaction.options.get('user') as {
+            member?: GuildMember;
+        } | null;
+        const member = userOption?.member || interaction.member!;
+        const { user } = member as { user: User };
+        const { username } = user;
 
         const embed = new EmbedBuilder()
             .setTitle(`${username}'s avatar`)
             .setDescription(
-                avatar ? null : "This user doesn't have any avatar."
+                user.avatarURL() ? null : "This user doesn't have any avatar."
             )
-            .setImage(avatar)
+            .setImage(user.avatarURL())
             .setColor(Colors.Yellow);
 
         await interaction.reply({ embeds: [embed] });
