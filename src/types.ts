@@ -1,8 +1,5 @@
-import {
-    Collection,
-    CommandInteraction,
-    SlashCommandBuilder,
-} from 'discord.js';
+import { Collection, CommandInteraction } from 'discord.js';
+import { SlashCommandSubcommandsOnlyBuilder } from '@discordjs/builders';
 
 declare module 'discord.js' {
     export interface Client {
@@ -18,6 +15,6 @@ export type EventType = {
 
 export type SlashCommand = {
     name: string;
-    data: Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>;
+    data: SlashCommandSubcommandsOnlyBuilder;
     execute(interaction: CommandInteraction): Promise<void>;
 };
