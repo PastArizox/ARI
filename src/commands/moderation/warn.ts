@@ -8,6 +8,7 @@ import {
 } from 'discord.js';
 import { EmbedBuilder, SlashCommandBuilder } from '@discordjs/builders';
 import { SlashCommand } from '../../types';
+import Warn from '../../models/warn';
 
 export const command: SlashCommand = {
     name: 'warn',
@@ -171,10 +172,3 @@ async function handleInfoWarn(
 
     interaction.reply(`Informations about the warn of ${member.user.username}`);
 }
-
-type Warn = {
-    title: string;
-    reason: string;
-    author: User;
-    date: string;
-};
